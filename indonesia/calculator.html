@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indonesian Tax Footprint Calculator | TaxGal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f6f7f5;
+            color: #26322d;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        h1 {
+            text-align: center;
+            color: #b21f2d;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #63756d;
+            margin-bottom: 30px;
+        }
+        .layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 40px;
+        }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+        .input-section {
+            background: #f9fbf9;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #d7e1da;
+            height: fit-content;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .language-toggle {
+            width: 100%;
+            background: #f4dfe2;
+            color: #b21f2d;
+            border: 1px solid #e6c1c7;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        .language-toggle:hover {
+            background: #eacbd0;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #45564f;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #b9c8c0;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        
+        .form-note { color: #607d8b; font-size: 13px; line-height: 1.45; margin: 4px 0 16px; }
+button {
+            width: 100%;
+            background-color: #b21f2d;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #8f1722;
+        }
+        .output-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            margin-bottom: 25px;
+        }
+        #totalDisplay {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1c2621;
+        }
+        #profileDisplay,
+        #nationalSourceDisplay {
+            font-size: 14px;
+            color: #63756d;
+            text-align: center;
+            font-style: italic;
+            max-width: 560px;
+            line-height: 1.45;
+        }
+        #nationalSourceDisplay {
+            margin-top: 8px;
+        }
+        #profileDisplay a,
+        #nationalSourceDisplay a {
+            color: #b21f2d;
+            font-weight: 600;
+        }
+        .category-tools {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 18px;
+        }
+        .category-detail {
+            background: #f9fbf9;
+            border: 1px solid #d7e1da;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .category-detail h2 {
+            margin: 0 0 8px;
+            color: #1c2621;
+            font-size: 20px;
+        }
+        .category-detail .amount {
+            margin: 0 0 10px;
+            color: #b21f2d;
+            font-weight: 700;
+        }
+        .category-detail p {
+            margin: 0;
+            color: #45564f;
+            line-height: 1.5;
+        }
+        .category-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .category-list-header h2 {
+            margin: 0;
+            color: #1c2621;
+            font-size: 20px;
+        }
+        .print-button {
+            width: auto;
+            margin-top: 0;
+            padding: 10px 14px;
+            white-space: nowrap;
+        }
+        .tax-category-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border: 1px solid #d7e1da;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .tax-category-list li {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 14px;
+            align-items: center;
+            padding: 12px 14px;
+            border-bottom: 1px solid #d7e1da;
+            color: #37483f;
+        }
+        .tax-category-list li:last-child {
+            border-bottom: none;
+        }
+        .tax-category-list button {
+            width: auto;
+            margin: 0;
+            padding: 7px 10px;
+            background: #f4dfe2;
+            color: #b21f2d;
+            font-size: 14px;
+        }
+        .tax-category-list button:hover {
+            background: #eacbd0;
+        }
+        .tax-category-list .category-amount {
+            font-weight: 700;
+            color: #1c2621;
+            white-space: nowrap;
+        }
+        @media (max-width: 560px) {
+            .category-list-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+            .print-button {
+                width: 100%;
+            }
+            .tax-category-list li {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .tax-category-list button {
+                width: 100%;
+            }
+        }
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .input-section,
+            .chart-wrapper,
+            .category-detail,
+            .print-button,
+            #profileDisplay,
+            #nationalSourceDisplay {
+                display: none !important;
+            }
+            .layout {
+                display: block;
+            }
+            .output-section {
+                align-items: stretch;
+            }
+            h1,
+            p.subtitle,
+            #totalDisplay {
+                text-align: left;
+            }
+            .category-tools {
+                max-width: none;
+            }
+            .tax-category-list li {
+                grid-template-columns: 1fr auto;
+            }
+            .tax-category-list button {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="site.css">
+</head>
+<body>
+    <nav class="site-nav" aria-label="Primary navigation">
+        <a class="site-brand" href="index.html">TaxGal</a>
+        <div class="site-links">
+            <a href="index.html">Calculators</a>
+            <a href="why_taxes_matter.html">Why Taxes Matter</a>
+            <a href="methodology_sources.html">Methodology</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+            <a href="privacy_policy.html">Privacy</a>
+        </div>
+    </nav>
+
+<div class="container">
+    <h1 id="pageTitle">Indonesia Tax Allocation Calculator</h1>
+    <p class="subtitle" id="pageSubtitle">Enter your tax amounts to estimate how national, provincial, and local taxes map to public spending categories.</p>
+
+    <div class="layout">
+        <div class="input-section">
+            <div class="form-group">
+                <label for="provinceSelect" id="provinceLabel">Select Your Province</label>
+                <select id="provinceSelect" onchange="calculateTaxes()"></select>
+            </div>
+            <div class="form-group">
+                <label for="nationalTax" id="nationalTaxLabel">National / Central Tax Paid (Rp)</label>
+                <input type="number" id="nationalTax" value="24000000" min="0">
+            </div>
+            <div class="form-group">
+                <label for="regionalTax" id="regionalTaxLabel">Provincial / Regional Tax Paid (Rp)</label>
+                <input type="number" id="regionalTax" value="9000000" min="0">
+            </div>
+            <div class="form-group">
+                <label for="localTax" id="localTaxLabel">Property / Local Fees Paid (Rp)</label>
+                <input type="number" id="localTax" value="3000000" min="0">
+            </div>
+            <button class="language-toggle" id="languageToggle" type="button" onclick="toggleLocalLanguage()">Show Indonesian</button>
+            <div class="form-note default-values-note" data-en="Default values are editable educational starting points. Use your own tax amounts when available; official country-average defaults will be added when reliable current budget and household tax data can be verified." data-local="These default values are editable educational starting points. Use your own tax amounts when available; official country-average defaults will be added when reliable current data can be verified.">Default values are editable educational starting points. Use your own tax amounts when available; official country-average defaults will be added when reliable current budget and household tax data can be verified.</div>
+            <button id="calculateButton" onclick="calculateTaxes()">Calculate Allocation</button>
+        </div>
+
+        <div class="output-section">
+            <div id="totalDisplay">Total Tax Footprint: Rp0.00</div>
+            <div class="chart-wrapper">
+                <canvas id="taxChart"></canvas>
+            </div>
+            <div id="profileDisplay">Loading province details...</div>
+            <div id="nationalSourceDisplay">
+                National model source: <a href="https://www.kemenkeu.go.id/apbn2025" target="_blank" rel="noopener noreferrer">Ministry of Finance APBN</a>.
+            </div>
+            <div class="category-tools">
+                <div class="category-detail" id="categoryDetail">
+                    <h2>Category Details</h2>
+                    <p>Select a donut slice or choose a category from the list to see more detail.</p>
+                </div>
+                <div class="category-list-header">
+                    <h2 id="printableListTitle">Printable Category List</h2>
+                    <button class="print-button" id="printButton" type="button" onclick="printCategoryList()">Print List</button>
+                </div>
+                <ul class="tax-category-list" id="categoryList"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const nationalBudgetSource = '<a href="https://peraturan.bpk.go.id/Details/308909/perpres-no-201-tahun-2024" target="_blank" rel="noopener noreferrer">APBN 2025 Presidential Regulation</a>';
+    const regionalBudgetSource = '<a href="https://djpk.kemenkeu.go.id/portal/data/apbd" target="_blank" rel="noopener noreferrer">DJPK APBD Data Portal</a>';
+    const provincialFinanceSource = '<a href="https://www.bps.go.id/en/publication/2024/12/20/6453851e55f22f31c4d30141/financial-statistics-of-provincial-government-2023-and-2024.html" target="_blank" rel="noopener noreferrer">BPS Provincial Government Finance Statistics</a>';
+
+    const provincesData = [
+        { name: "Aceh", code: "AC", profile: "ACEH", model: "special_autonomy" },
+        { name: "Bali", code: "BA", profile: "BALI", model: "tourism_service" },
+        { name: "Bangka Belitung Islands / Kepulauan Bangka Belitung", code: "BB", profile: "BANGKA_BELITUNG", model: "island_resource" },
+        { name: "Banten", code: "BT", profile: "BANTEN", model: "urban_industry" },
+        { name: "Bengkulu", code: "BE", profile: "BENGKULU", model: "small_sumatra" },
+        { name: "Central Java / Jawa Tengah", code: "JT", profile: "CENTRAL_JAVA", model: "population_services" },
+        { name: "Central Kalimantan / Kalimantan Tengah", code: "KT", profile: "CENTRAL_KALIMANTAN", model: "resource_frontier" },
+        { name: "Central Papua / Papua Tengah", code: "PT", profile: "CENTRAL_PAPUA", model: "papua_highland" },
+        { name: "Central Sulawesi / Sulawesi Tengah", code: "ST", profile: "CENTRAL_SULAWESI", model: "resource_sulawesi" },
+        { name: "East Java / Jawa Timur", code: "JI", profile: "EAST_JAVA", model: "urban_industry" },
+        { name: "East Kalimantan / Kalimantan Timur", code: "KI", profile: "EAST_KALIMANTAN", model: "resource_capital" },
+        { name: "East Nusa Tenggara / Nusa Tenggara Timur", code: "NT", profile: "EAST_NUSA_TENGGARA", model: "island_social" },
+        { name: "Gorontalo", code: "GO", profile: "GORONTALO", model: "small_sulawesi" },
+        { name: "Highland Papua / Papua Pegunungan", code: "PP", profile: "HIGHLAND_PAPUA", model: "papua_highland" },
+        { name: "Jakarta", code: "JK", profile: "JAKARTA", model: "capital_metro" },
+        { name: "Jambi", code: "JA", profile: "JAMBI", model: "resource_sumatra" },
+        { name: "Lampung", code: "LA", profile: "LAMPUNG", model: "agri_gateway" },
+        { name: "Maluku", code: "MA", profile: "MALUKU", model: "island_remote" },
+        { name: "North Kalimantan / Kalimantan Utara", code: "KU", profile: "NORTH_KALIMANTAN", model: "border_resource" },
+        { name: "North Maluku / Maluku Utara", code: "MU", profile: "NORTH_MALUKU", model: "island_resource" },
+        { name: "North Sulawesi / Sulawesi Utara", code: "SA", profile: "NORTH_SULAWESI", model: "sulawesi_service" },
+        { name: "North Sumatra / Sumatera Utara", code: "SU", profile: "NORTH_SUMATRA", model: "large_sumatra" },
+        { name: "Papua", code: "PA", profile: "PAPUA", model: "papua_remote" },
+        { name: "Riau", code: "RI", profile: "RIAU", model: "resource_sumatra" },
+        { name: "Riau Islands / Kepulauan Riau", code: "KR", profile: "RIAU_ISLANDS", model: "island_trade" },
+        { name: "South Kalimantan / Kalimantan Selatan", code: "KS", profile: "SOUTH_KALIMANTAN", model: "resource_kalimantan" },
+        { name: "South Papua / Papua Selatan", code: "PS", profile: "SOUTH_PAPUA", model: "papua_remote" },
+        { name: "South Sulawesi / Sulawesi Selatan", code: "SN", profile: "SOUTH_SULAWESI", model: "sulawesi_growth" },
+        { name: "South Sumatra / Sumatera Selatan", code: "SS", profile: "SOUTH_SUMATRA", model: "resource_sumatra" },
+        { name: "Southeast Sulawesi / Sulawesi Tenggara", code: "SG", profile: "SOUTHEAST_SULAWESI", model: "resource_sulawesi" },
+        { name: "Southwest Papua / Papua Barat Daya", code: "PD", profile: "SOUTHWEST_PAPUA", model: "papua_remote" },
+        { name: "West Java / Jawa Barat", code: "JB", profile: "WEST_JAVA", model: "population_industry" },
+        { name: "West Kalimantan / Kalimantan Barat", code: "KB", profile: "WEST_KALIMANTAN", model: "border_resource" },
+        { name: "West Nusa Tenggara / Nusa Tenggara Barat", code: "NB", profile: "WEST_NUSA_TENGGARA", model: "island_social" },
+        { name: "West Papua / Papua Barat", code: "PB", profile: "WEST_PAPUA", model: "papua_remote" },
+        { name: "West Sulawesi / Sulawesi Barat", code: "SR", profile: "WEST_SULAWESI", model: "small_sulawesi" },
+        { name: "West Sumatra / Sumatera Barat", code: "SB", profile: "WEST_SUMATRA", model: "sumatra_social" },
+        { name: "Yogyakarta", code: "YO", profile: "YOGYAKARTA", model: "special_culture" }
+    ];
+
+    const provinceNamesId = {
+        ACEH: "Aceh",
+        BALI: "Bali",
+        BANGKA_BELITUNG: "Kepulauan Bangka Belitung",
+        BANTEN: "Banten",
+        BENGKULU: "Bengkulu",
+        CENTRAL_JAVA: "Jawa Tengah",
+        CENTRAL_KALIMANTAN: "Kalimantan Tengah",
+        CENTRAL_PAPUA: "Papua Tengah",
+        CENTRAL_SULAWESI: "Sulawesi Tengah",
+        EAST_JAVA: "Jawa Timur",
+        EAST_KALIMANTAN: "Kalimantan Timur",
+        EAST_NUSA_TENGGARA: "Nusa Tenggara Timur",
+        GORONTALO: "Gorontalo",
+        HIGHLAND_PAPUA: "Papua Pegunungan",
+        JAKARTA: "Jakarta",
+        JAMBI: "Jambi",
+        LAMPUNG: "Lampung",
+        MALUKU: "Maluku",
+        NORTH_KALIMANTAN: "Kalimantan Utara",
+        NORTH_MALUKU: "Maluku Utara",
+        NORTH_SULAWESI: "Sulawesi Utara",
+        NORTH_SUMATRA: "Sumatera Utara",
+        PAPUA: "Papua",
+        RIAU: "Riau",
+        RIAU_ISLANDS: "Kepulauan Riau",
+        SOUTH_KALIMANTAN: "Kalimantan Selatan",
+        SOUTH_PAPUA: "Papua Selatan",
+        SOUTH_SULAWESI: "Sulawesi Selatan",
+        SOUTH_SUMATRA: "Sumatera Selatan",
+        SOUTHEAST_SULAWESI: "Sulawesi Tenggara",
+        SOUTHWEST_PAPUA: "Papua Barat Daya",
+        WEST_JAVA: "Jawa Barat",
+        WEST_KALIMANTAN: "Kalimantan Barat",
+        WEST_NUSA_TENGGARA: "Nusa Tenggara Barat",
+        WEST_PAPUA: "Papua Barat",
+        WEST_SULAWESI: "Sulawesi Barat",
+        WEST_SUMATRA: "Sumatera Barat",
+        YOGYAKARTA: "Daerah Istimewa Yogyakarta"
+    };
+
+    function buildProfileText(profile, emphasis) {
+        return `Profile: ${provinceNamesId[profile] || profile}. ${emphasis} Source: ${regionalBudgetSource} and ${provincialFinanceSource}.`;
+    }
+
+    const profilesDesc = {
+        ACEH: buildProfileText("ACEH", "Special autonomy model with education, health, social protection, infrastructure, and village development weighted strongly."),
+        BALI: buildProfileText("BALI", "Tourism and services model with health, transport, local services, culture, and economic recovery weights."),
+        BANGKA_BELITUNG: buildProfileText("BANGKA_BELITUNG", "Island and resource model with transport, local services, education, health, and economic affairs weights."),
+        BANTEN: buildProfileText("BANTEN", "Urban-industrial model with education, health, transport, housing, and local services weights."),
+        BENGKULU: buildProfileText("BENGKULU", "Smaller Sumatra model emphasizing education, health, agriculture, transport, and social protection."),
+        CENTRAL_JAVA: buildProfileText("CENTRAL_JAVA", "Population-services model with strong education, health, social protection, local services, and infrastructure weights."),
+        CENTRAL_KALIMANTAN: buildProfileText("CENTRAL_KALIMANTAN", "Resource-frontier model with infrastructure, agriculture, environment, local services, health, and education weights."),
+        CENTRAL_PAPUA: buildProfileText("CENTRAL_PAPUA", "Papua highland model with high transport, health, education, local services, and special-autonomy service delivery weights."),
+        CENTRAL_SULAWESI: buildProfileText("CENTRAL_SULAWESI", "Resource and Sulawesi growth model with infrastructure, agriculture, health, education, and local services weights."),
+        EAST_JAVA: buildProfileText("EAST_JAVA", "Urban-industrial model with education, health, transport, economic affairs, local services, and social protection weights."),
+        EAST_KALIMANTAN: buildProfileText("EAST_KALIMANTAN", "Resource and capital-region model with infrastructure, environment, local services, health, education, and economic affairs weights."),
+        EAST_NUSA_TENGGARA: buildProfileText("EAST_NUSA_TENGGARA", "Island social model with higher health, education, local services, transport, agriculture, and social protection weights."),
+        GORONTALO: buildProfileText("GORONTALO", "Small Sulawesi model with education, health, agriculture, local services, and transport weights."),
+        HIGHLAND_PAPUA: buildProfileText("HIGHLAND_PAPUA", "Papua highland model with high transport, local services, health, education, and social protection weights."),
+        JAKARTA: buildProfileText("JAKARTA", "Capital metro model with strong urban services, transport, health, education, public order, and administration weights."),
+        JAMBI: buildProfileText("JAMBI", "Resource Sumatra model with agriculture, infrastructure, education, health, and local services weights."),
+        LAMPUNG: buildProfileText("LAMPUNG", "Agricultural gateway model with education, health, agriculture, transport, and local services weights."),
+        MALUKU: buildProfileText("MALUKU", "Remote island model with higher transport, local services, health, education, and public order weights."),
+        NORTH_KALIMANTAN: buildProfileText("NORTH_KALIMANTAN", "Border-resource model with infrastructure, local services, health, education, and transport weights."),
+        NORTH_MALUKU: buildProfileText("NORTH_MALUKU", "Island-resource model with transport, local services, health, education, and economic affairs weights."),
+        NORTH_SULAWESI: buildProfileText("NORTH_SULAWESI", "Sulawesi services model with health, education, transport, tourism-linked services, and local services weights."),
+        NORTH_SUMATRA: buildProfileText("NORTH_SUMATRA", "Large Sumatra model with education, health, infrastructure, agriculture, local services, and social protection weights."),
+        PAPUA: buildProfileText("PAPUA", "Papua remote model with high transport, health, education, local services, and special-autonomy support weights."),
+        RIAU: buildProfileText("RIAU", "Resource Sumatra model with infrastructure, economic affairs, education, health, agriculture, and local services weights."),
+        RIAU_ISLANDS: buildProfileText("RIAU_ISLANDS", "Island trade model with transport, local services, health, education, and economic affairs weights."),
+        SOUTH_KALIMANTAN: buildProfileText("SOUTH_KALIMANTAN", "Resource Kalimantan model with infrastructure, environment, education, health, and local services weights."),
+        SOUTH_PAPUA: buildProfileText("SOUTH_PAPUA", "Papua remote model with transport, local services, health, education, agriculture, and special-autonomy weights."),
+        SOUTH_SULAWESI: buildProfileText("SOUTH_SULAWESI", "Sulawesi growth model with education, health, infrastructure, agriculture, local services, and transport weights."),
+        SOUTH_SUMATRA: buildProfileText("SOUTH_SUMATRA", "Resource Sumatra model with infrastructure, agriculture, education, health, and local services weights."),
+        SOUTHEAST_SULAWESI: buildProfileText("SOUTHEAST_SULAWESI", "Resource Sulawesi model with infrastructure, agriculture, health, education, and local services weights."),
+        SOUTHWEST_PAPUA: buildProfileText("SOUTHWEST_PAPUA", "Papua remote model with transport, local services, health, education, and special-autonomy support weights."),
+        WEST_JAVA: buildProfileText("WEST_JAVA", "Population-industry model with strong education, health, social protection, transport, and urban/local services weights."),
+        WEST_KALIMANTAN: buildProfileText("WEST_KALIMANTAN", "Border-resource model with agriculture, infrastructure, health, education, and local services weights."),
+        WEST_NUSA_TENGGARA: buildProfileText("WEST_NUSA_TENGGARA", "Island social model with health, education, local services, agriculture, transport, and social protection weights."),
+        WEST_PAPUA: buildProfileText("WEST_PAPUA", "Papua remote model with high transport, local services, health, education, and special-autonomy service weights."),
+        WEST_SULAWESI: buildProfileText("WEST_SULAWESI", "Small Sulawesi model with agriculture, education, health, local services, and transport weights."),
+        WEST_SUMATRA: buildProfileText("WEST_SUMATRA", "Sumatra social model with education, health, agriculture, local services, and social protection weights."),
+        YOGYAKARTA: buildProfileText("YOGYAKARTA", "Special culture and education model with education, health, local services, tourism/culture, and social protection weights.")
+    };
+
+    const modelPresets = {
+        special_autonomy: { e: 0.24, h: 0.15, s: 0.12, i: 0.15, p: 0.05, d: 0.03, r: 0.14, c: 0.08, g: 0.04, pe: 0.30, pc: 0.48, pp: 0.05, pt: 0.10, pg: 0.07 },
+        tourism_service: { e: 0.20, h: 0.16, s: 0.10, i: 0.15, p: 0.05, d: 0.03, r: 0.08, c: 0.16, g: 0.07, pe: 0.28, pc: 0.53, pp: 0.04, pt: 0.09, pg: 0.06 },
+        island_resource: { e: 0.19, h: 0.14, s: 0.10, i: 0.20, p: 0.05, d: 0.03, r: 0.13, c: 0.10, g: 0.06, pe: 0.27, pc: 0.48, pp: 0.05, pt: 0.14, pg: 0.06 },
+        urban_industry: { e: 0.23, h: 0.14, s: 0.11, i: 0.17, p: 0.05, d: 0.04, r: 0.07, c: 0.13, g: 0.06, pe: 0.34, pc: 0.46, pp: 0.05, pt: 0.09, pg: 0.06 },
+        small_sumatra: { e: 0.22, h: 0.15, s: 0.12, i: 0.16, p: 0.05, d: 0.04, r: 0.13, c: 0.08, g: 0.05, pe: 0.32, pc: 0.46, pp: 0.05, pt: 0.11, pg: 0.06 },
+        population_services: { e: 0.25, h: 0.15, s: 0.12, i: 0.14, p: 0.04, d: 0.04, r: 0.09, c: 0.11, g: 0.06, pe: 0.35, pc: 0.45, pp: 0.05, pt: 0.09, pg: 0.06 },
+        resource_frontier: { e: 0.19, h: 0.13, s: 0.09, i: 0.22, p: 0.05, d: 0.03, r: 0.16, c: 0.09, g: 0.04, pe: 0.27, pc: 0.47, pp: 0.05, pt: 0.15, pg: 0.06 },
+        papua_highland: { e: 0.20, h: 0.16, s: 0.12, i: 0.24, p: 0.06, d: 0.02, r: 0.10, c: 0.07, g: 0.03, pe: 0.24, pc: 0.47, pp: 0.06, pt: 0.17, pg: 0.06 },
+        resource_sulawesi: { e: 0.20, h: 0.14, s: 0.10, i: 0.19, p: 0.05, d: 0.03, r: 0.16, c: 0.08, g: 0.05, pe: 0.29, pc: 0.47, pp: 0.05, pt: 0.13, pg: 0.06 },
+        resource_capital: { e: 0.18, h: 0.13, s: 0.08, i: 0.24, p: 0.05, d: 0.03, r: 0.10, c: 0.13, g: 0.06, pe: 0.27, pc: 0.49, pp: 0.05, pt: 0.13, pg: 0.06 },
+        island_social: { e: 0.22, h: 0.17, s: 0.14, i: 0.17, p: 0.05, d: 0.03, r: 0.12, c: 0.06, g: 0.04, pe: 0.30, pc: 0.47, pp: 0.05, pt: 0.12, pg: 0.06 },
+        small_sulawesi: { e: 0.22, h: 0.15, s: 0.12, i: 0.16, p: 0.05, d: 0.03, r: 0.15, c: 0.08, g: 0.04, pe: 0.31, pc: 0.46, pp: 0.05, pt: 0.12, pg: 0.06 },
+        capital_metro: { e: 0.20, h: 0.17, s: 0.09, i: 0.18, p: 0.07, d: 0.03, r: 0.02, c: 0.18, g: 0.06, pe: 0.25, pc: 0.56, pp: 0.06, pt: 0.07, pg: 0.06 },
+        resource_sumatra: { e: 0.20, h: 0.13, s: 0.10, i: 0.20, p: 0.05, d: 0.04, r: 0.15, c: 0.08, g: 0.05, pe: 0.30, pc: 0.46, pp: 0.05, pt: 0.13, pg: 0.06 },
+        agri_gateway: { e: 0.22, h: 0.14, s: 0.11, i: 0.17, p: 0.05, d: 0.04, r: 0.16, c: 0.07, g: 0.04, pe: 0.32, pc: 0.45, pp: 0.05, pt: 0.12, pg: 0.06 },
+        island_remote: { e: 0.20, h: 0.16, s: 0.11, i: 0.22, p: 0.06, d: 0.03, r: 0.09, c: 0.08, g: 0.05, pe: 0.26, pc: 0.49, pp: 0.06, pt: 0.13, pg: 0.06 },
+        border_resource: { e: 0.19, h: 0.14, s: 0.10, i: 0.22, p: 0.06, d: 0.03, r: 0.13, c: 0.08, g: 0.05, pe: 0.28, pc: 0.47, pp: 0.06, pt: 0.13, pg: 0.06 },
+        sulawesi_service: { e: 0.21, h: 0.15, s: 0.11, i: 0.17, p: 0.05, d: 0.03, r: 0.12, c: 0.11, g: 0.05, pe: 0.31, pc: 0.47, pp: 0.05, pt: 0.11, pg: 0.06 },
+        large_sumatra: { e: 0.22, h: 0.14, s: 0.11, i: 0.17, p: 0.05, d: 0.04, r: 0.13, c: 0.09, g: 0.05, pe: 0.33, pc: 0.45, pp: 0.05, pt: 0.11, pg: 0.06 },
+        papua_remote: { e: 0.19, h: 0.16, s: 0.12, i: 0.24, p: 0.06, d: 0.02, r: 0.09, c: 0.08, g: 0.04, pe: 0.24, pc: 0.48, pp: 0.06, pt: 0.16, pg: 0.06 },
+        island_trade: { e: 0.18, h: 0.14, s: 0.09, i: 0.22, p: 0.05, d: 0.03, r: 0.05, c: 0.18, g: 0.06, pe: 0.27, pc: 0.51, pp: 0.05, pt: 0.11, pg: 0.06 },
+        resource_kalimantan: { e: 0.19, h: 0.14, s: 0.10, i: 0.21, p: 0.05, d: 0.03, r: 0.15, c: 0.08, g: 0.05, pe: 0.28, pc: 0.47, pp: 0.05, pt: 0.14, pg: 0.06 },
+        sulawesi_growth: { e: 0.22, h: 0.14, s: 0.11, i: 0.17, p: 0.05, d: 0.03, r: 0.14, c: 0.09, g: 0.05, pe: 0.32, pc: 0.46, pp: 0.05, pt: 0.11, pg: 0.06 },
+        population_industry: { e: 0.24, h: 0.15, s: 0.12, i: 0.15, p: 0.05, d: 0.04, r: 0.07, c: 0.12, g: 0.06, pe: 0.35, pc: 0.46, pp: 0.05, pt: 0.08, pg: 0.06 },
+        sumatra_social: { e: 0.22, h: 0.15, s: 0.13, i: 0.15, p: 0.05, d: 0.04, r: 0.13, c: 0.08, g: 0.05, pe: 0.32, pc: 0.46, pp: 0.05, pt: 0.11, pg: 0.06 },
+        special_culture: { e: 0.27, h: 0.15, s: 0.11, i: 0.12, p: 0.04, d: 0.03, r: 0.05, c: 0.17, g: 0.06, pe: 0.36, pc: 0.46, pp: 0.04, pt: 0.08, pg: 0.06 }
+    };
+
+    const categoryDetails = {
+        "Education": "National and regional spending for schools, higher education, vocational training, education transfers, and local education services.",
+        "Health": "Public health, hospitals, health insurance support, local clinics, disease prevention, and regional health services.",
+        "Social Protection": "Social assistance, poverty reduction, family support, food support, and local welfare programs.",
+        "Infrastructure & Transport": "Roads, bridges, ports, public works, water infrastructure, transport access, and capital expenditure.",
+        "Public Order & Safety": "Police-related support, public order, disaster management, emergency services, and regional security functions.",
+        "Debt Interest": "Estimated share used for national and regional interest payments and debt-service obligations.",
+        "Village, Rural & Agriculture": "Village funds, rural development, agriculture, fisheries, forestry, food security, and livelihood support.",
+        "Housing & Community Amenities": "Housing, settlements, sanitation, parks, markets, local facilities, and urban/community services.",
+        "Government Operations & Other": "General administration, tax collection, finance, planning, economic affairs, environment, culture, and remaining public services."
+    };
+
+    const categoryLabels = {
+        en: {
+            "Education": "Education",
+            "Health": "Health",
+            "Social Protection": "Social Protection",
+            "Infrastructure & Transport": "Infrastructure & Transport",
+            "Public Order & Safety": "Public Order & Safety",
+            "Debt Interest": "Debt Interest",
+            "Village, Rural & Agriculture": "Village, Rural & Agriculture",
+            "Housing & Community Amenities": "Housing & Community Amenities",
+            "Government Operations & Other": "Government Operations & Other"
+        },
+        id: {
+            "Education": "Pendidikan",
+            "Health": "Kesehatan",
+            "Social Protection": "Perlindungan Sosial",
+            "Infrastructure & Transport": "Infrastruktur & Transportasi",
+            "Public Order & Safety": "Ketertiban Umum & Keamanan",
+            "Debt Interest": "Bunga Utang",
+            "Village, Rural & Agriculture": "Desa, Perdesaan & Pertanian",
+            "Housing & Community Amenities": "Perumahan & Fasilitas Umum",
+            "Government Operations & Other": "Pemerintahan & Lainnya"
+        }
+    };
+
+    const localizedCategoryDescriptions = {
+        id: {
+            "Education": "Belanja nasional dan daerah untuk sekolah, pendidikan tinggi, pelatihan vokasi, transfer pendidikan, dan layanan pendidikan lokal.",
+            "Health": "Kesehatan masyarakat, rumah sakit, dukungan jaminan kesehatan, puskesmas/klinik daerah, pencegahan penyakit, dan layanan kesehatan daerah.",
+            "Social Protection": "Bantuan sosial, pengentasan kemiskinan, dukungan keluarga, bantuan pangan, dan program kesejahteraan daerah.",
+            "Infrastructure & Transport": "Jalan, jembatan, pelabuhan, pekerjaan umum, infrastruktur air, akses transportasi, dan belanja modal.",
+            "Public Order & Safety": "Dukungan ketertiban umum, penanggulangan bencana, layanan darurat, dan fungsi keamanan daerah.",
+            "Debt Interest": "Perkiraan bagian yang digunakan untuk pembayaran bunga dan kewajiban layanan utang nasional maupun daerah.",
+            "Village, Rural & Agriculture": "Dana desa, pembangunan perdesaan, pertanian, perikanan, kehutanan, ketahanan pangan, dan dukungan mata pencaharian.",
+            "Housing & Community Amenities": "Perumahan, permukiman, sanitasi, taman, pasar, fasilitas lokal, dan layanan perkotaan/komunitas.",
+            "Government Operations & Other": "Administrasi umum, pemungutan pajak, keuangan, perencanaan, urusan ekonomi, lingkungan, budaya, dan program publik lainnya."
+        }
+    };
+
+    const uiText = {
+        en: {
+            pageTitle: "Indonesia Tax Allocation Calculator",
+            pageSubtitle: "Enter your tax amounts to estimate how national, provincial, and local taxes map to public spending categories.",
+            provinceLabel: "Select Your Province",
+            nationalTaxLabel: "National / Central Tax Paid (Rp)",
+            regionalTaxLabel: "Provincial / Regional Tax Paid (Rp)",
+            localTaxLabel: "Property / Local Fees Paid (Rp)",
+            calculateButton: "Calculate Allocation",
+            totalPrefix: "Total Tax Footprint",
+            categoryDetailsTitle: "Category Details",
+            categoryDetailsPrompt: "Select a donut slice or choose a category from the list to see more detail.",
+            emptyList: "No tax allocation to display yet.",
+            ofFootprint: "of your tax footprint",
+            moreInfo: "More Info",
+            printableListTitle: "Printable Category List",
+            printButton: "Print List",
+            showLocalLanguage: "Show Indonesian",
+            showEnglish: "Show English",
+            nationalSource: "National model source:"
+        },
+        id: {
+            pageTitle: "Kalkulator Alokasi Pajak Indonesia",
+            pageSubtitle: "Masukkan jumlah pajak Anda untuk memperkirakan bagaimana pajak nasional, provinsi, dan lokal dialokasikan ke kategori belanja publik.",
+            provinceLabel: "Pilih Provinsi Anda",
+            nationalTaxLabel: "Pajak Nasional / Pusat Dibayar (Rp)",
+            regionalTaxLabel: "Pajak Provinsi / Daerah Dibayar (Rp)",
+            localTaxLabel: "Pajak Properti / Retribusi Lokal Dibayar (Rp)",
+            calculateButton: "Hitung Alokasi",
+            totalPrefix: "Total Jejak Pajak",
+            categoryDetailsTitle: "Detail Kategori",
+            categoryDetailsPrompt: "Pilih bagian diagram donat atau pilih kategori dari daftar untuk melihat detail.",
+            emptyList: "Belum ada alokasi pajak untuk ditampilkan.",
+            ofFootprint: "dari total pajak Anda",
+            moreInfo: "Info Lanjut",
+            printableListTitle: "Daftar Kategori yang Dapat Dicetak",
+            printButton: "Cetak Daftar",
+            showLocalLanguage: "Tampilkan Bahasa Indonesia",
+            showEnglish: "Show English",
+            nationalSource: "Sumber model nasional:"
+        }
+    };
+
+    let taxChart = null;
+    let currentCategoryData = [];
+    let currentTotalTax = 0;
+    let currentLanguage = "en";
+    let useLocalLanguage = false;
+
+    function getText(key) {
+        const textSet = uiText[currentLanguage] || uiText.en;
+        return textSet[key] || uiText.en[key];
+    }
+
+    function getCategoryLabel(categoryName) {
+        const labels = categoryLabels[currentLanguage] || categoryLabels.en;
+        return labels[categoryName] || categoryLabels.en[categoryName] || categoryName;
+    }
+
+    function getCategoryDescription(categoryName) {
+        const descriptions = localizedCategoryDescriptions[currentLanguage];
+        return (descriptions && descriptions[categoryName]) || categoryDetails[categoryName] || "This category represents one part of the estimated tax allocation.";
+    }
+
+    function applyLanguage(language) {
+        currentLanguage = language;
+        const ids = [
+            "pageTitle",
+            "pageSubtitle",
+            "provinceLabel",
+            "nationalTaxLabel",
+            "regionalTaxLabel",
+            "localTaxLabel",
+            "calculateButton",
+            "printableListTitle",
+            "printButton"
+        ];
+
+        ids.forEach(id => {
+            document.getElementById(id).innerText = getText(id);
+        });
+
+        document.getElementById('languageToggle').innerText = useLocalLanguage ? getText('showEnglish') : uiText.en.showLocalLanguage;
+        document.getElementById('nationalSourceDisplay').innerHTML = `${getText('nationalSource')} ${nationalBudgetSource}.`;
+    }
+
+    function toggleLocalLanguage() {
+        useLocalLanguage = !useLocalLanguage;
+        calculateTaxes();
+    }
+
+    window.onload = function() {
+        const select = document.getElementById('provinceSelect');
+        provincesData.forEach(province => {
+            const opt = document.createElement('option');
+            opt.value = province.code;
+            opt.innerHTML = province.name;
+            if (province.code === "JK") opt.selected = true;
+            select.appendChild(opt);
+        });
+        calculateTaxes();
+    };
+
+    function formatCurrency(value) {
+        return value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+    }
+
+    function buildNationalAllocations(nationalTax) {
+        return {
+            education: nationalTax * 0.20,
+            health: nationalTax * 0.08,
+            social: nationalTax * 0.16,
+            infrastructure: nationalTax * 0.15,
+            safety: nationalTax * 0.06,
+            debt: nationalTax * 0.12,
+            ruralAgri: nationalTax * 0.10,
+            community: nationalTax * 0.04,
+            governmentOther: nationalTax * 0.09
+        };
+    }
+
+    function buildProvinceCategories(model, regionalTax, localTax, nationalAlloc) {
+        return {
+            "Education": (regionalTax * model.e) + (localTax * model.pe) + nationalAlloc.education,
+            "Health": (regionalTax * model.h) + nationalAlloc.health,
+            "Social Protection": (regionalTax * model.s) + nationalAlloc.social,
+            "Infrastructure & Transport": (regionalTax * model.i) + (localTax * model.pt) + nationalAlloc.infrastructure,
+            "Public Order & Safety": (regionalTax * model.p) + (localTax * model.pp) + nationalAlloc.safety,
+            "Debt Interest": (regionalTax * model.d) + nationalAlloc.debt,
+            "Village, Rural & Agriculture": (regionalTax * model.r) + nationalAlloc.ruralAgri,
+            "Housing & Community Amenities": (regionalTax * model.c) + (localTax * model.pc) + nationalAlloc.community,
+            "Government Operations & Other": (regionalTax * model.g) + (localTax * model.pg) + nationalAlloc.governmentOther
+        };
+    }
+
+    function renderCategoryDetails(categoryName) {
+        const detailEl = document.getElementById('categoryDetail');
+        const category = currentCategoryData.find(item => item.name === categoryName) || currentCategoryData[0];
+
+        if (!category) {
+            detailEl.innerHTML = `
+                <h2>${getText('categoryDetailsTitle')}</h2>
+                <p>${getText('categoryDetailsPrompt')}</p>
+            `;
+            return;
+        }
+
+        const pct = currentTotalTax > 0 ? ((category.value / currentTotalTax) * 100).toFixed(1) : '0.0';
+        detailEl.innerHTML = `
+            <h2>${getCategoryLabel(category.name)}</h2>
+            <div class="amount">${formatCurrency(category.value)} • ${pct}% ${getText('ofFootprint')}</div>
+            <p>${getCategoryDescription(category.name)}</p>
+        `;
+    }
+
+    function renderCategoryList() {
+        const listEl = document.getElementById('categoryList');
+
+        if (!currentCategoryData.length) {
+            listEl.innerHTML = `<li>${getText('emptyList')}</li>`;
+            return;
+        }
+
+        listEl.innerHTML = currentCategoryData.map(item => {
+            const pct = currentTotalTax > 0 ? ((item.value / currentTotalTax) * 100).toFixed(1) : '0.0';
+            return `
+                <li>
+                    <span>${getCategoryLabel(item.name)}</span>
+                    <span class="category-amount">${formatCurrency(item.value)} (${pct}%)</span>
+                    <button type="button" onclick="renderCategoryDetails('${item.name.replace(/'/g, "\\'")}')">${getText('moreInfo')}</button>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function escapeReceiptHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    }
+
+    function printCategoryList() {
+        if (!currentCategoryData.length) {
+            calculateTaxes();
+        }
+        const totalText = document.getElementById('totalDisplay')?.innerText || '';
+        const profileText = document.getElementById('profileDisplay')?.innerText || '';
+        const sourceText = document.getElementById('federalSourceDisplay')?.innerText || '';
+        const rows = currentCategoryData.map(item => {
+            const pct = currentTotalTax > 0 ? ((item.value / currentTotalTax) * 100).toFixed(1) : '0.0';
+            return `<tr><td>${escapeReceiptHtml(getCategoryLabel(item.name))}</td><td>${escapeReceiptHtml(formatCurrency(item.value))}</td><td>${pct}%</td></tr>`;
+        }).join('');
+        const receiptWindow = window.open('', 'taxgalReceipt', 'width=760,height=900');
+        if (!receiptWindow) {
+            window.print();
+            return;
+        }
+        receiptWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>TaxGal Printable Category Receipt</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #17212b; margin: 32px; }
+    .receipt { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 24px; margin: 0 0 6px; }
+    .meta { color: #475569; font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+    .total { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 14px; font-weight: 700; margin: 16px 0; background: #f8fafc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; vertical-align: top; }
+    th:nth-child(2), th:nth-child(3), td:nth-child(2), td:nth-child(3) { text-align: right; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #475569; }
+    .note { color: #64748b; font-size: 12px; line-height: 1.5; margin-top: 18px; }
+    @media print { body { margin: 18px; } }
+  </style>
+</head>
+<body>
+  <main class="receipt">
+    <h1>TaxGal Category Receipt</h1>
+    <div class="meta">Generated from the calculator estimate. This is educational information, not an official tax statement.</div>
+    <div class="total">${escapeReceiptHtml(totalText)}</div>
+    <table>
+      <thead><tr><th>Category</th><th>Amount</th><th>Share</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="note">${escapeReceiptHtml(profileText)}</div>
+    <div class="note">${escapeReceiptHtml(sourceText)}</div>
+  </main>
+  ${'<script>'}window.onload = () => { window.print(); setTimeout(() => window.close(), 300); };${'</scr' + 'ipt>'}
+</body>
+</html>`);
+        receiptWindow.document.close();
+    }
+
+    function calculateTaxes() {
+        applyLanguage(useLocalLanguage ? "id" : "en");
+
+        const provinceCode = document.getElementById('provinceSelect').value;
+        const provinceObj = provincesData.find(province => province.code === provinceCode);
+        const profile = provinceObj.profile;
+        const model = modelPresets[provinceObj.model];
+
+        document.getElementById('profileDisplay').innerHTML = profilesDesc[profile];
+
+        const nationalTax = parseFloat(document.getElementById('nationalTax').value) || 0;
+        const regionalTax = parseFloat(document.getElementById('regionalTax').value) || 0;
+        const localTax = parseFloat(document.getElementById('localTax').value) || 0;
+        const totalTax = nationalTax + regionalTax + localTax;
+
+        currentTotalTax = totalTax;
+        document.getElementById('totalDisplay').innerText = `${getText('totalPrefix')}: ${formatCurrency(totalTax)}`;
+
+        if (totalTax === 0) {
+            currentCategoryData = [];
+            renderCategoryDetails();
+            renderCategoryList();
+            if (taxChart) taxChart.destroy();
+            return;
+        }
+
+        const nationalAlloc = buildNationalAllocations(nationalTax);
+        const categories = buildProvinceCategories(model, regionalTax, localTax, nationalAlloc);
+        const sortedData = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+        const labels = sortedData.map(item => getCategoryLabel(item[0]));
+        const values = sortedData.map(item => item[1]);
+
+        currentCategoryData = sortedData.map(item => ({ name: item[0], value: item[1] }));
+        renderCategoryDetails(currentCategoryData[0].name);
+        renderCategoryList();
+
+        const ctx = document.getElementById('taxChart').getContext('2d');
+        if (taxChart) taxChart.destroy();
+
+        taxChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        '#b21f2d', '#d64352', '#f0a02f', '#e3c05f', '#25765a',
+                        '#34907a', '#4a6f83', '#8a9a8f', '#d9e1dc'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                onClick: function(event, elements) {
+                    if (!elements.length) return;
+                    const index = elements[0].index;
+                    renderCategoryDetails(currentCategoryData[index].name);
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                const pct = ((val / totalTax) * 100).toFixed(1);
+                                return ` ${formatCurrency(val)} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

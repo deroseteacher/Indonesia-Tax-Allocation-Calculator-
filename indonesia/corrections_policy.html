@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corrections Policy | TaxGal Indonesia</title>
+  <meta name="description" content="TaxGal Indonesia corrections policy for source suggestions, official budget feedback, accessibility notes, and calculator improvements.">
+  <link rel="stylesheet" href="site.css">
+  <style>
+    .article-shell { max-width: 960px; margin: 0 auto; padding: 28px 20px 46px; }
+    .article-top { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:20px; }
+    .article-brand { display:inline-flex; align-items:center; gap:10px; color:#134e4a; font-weight:900; text-decoration:none; }
+    .article-brand img { width:46px; height:46px; object-fit:contain; border-radius:50%; }
+    .language-toggle { border:1px solid rgba(15,23,42,.18); background:#fff; color:#134e4a; border-radius:999px; padding:10px 14px; font-weight:800; cursor:pointer; box-shadow:0 8px 24px rgba(15,23,42,.08); }
+    .article-shell h1 { font-size:clamp(2rem,5vw,3.4rem); line-height:1.02; margin:18px 0; color:#17212b; }
+    .article-shell h2 { margin-top:34px; color:#134e4a; }
+    .article-shell p, .article-shell li { color:#475569; line-height:1.75; font-size:1.04rem; }
+    .article-shell ul, .article-shell ol { padding-left:1.25rem; }
+    .callout { border-left:4px solid #0f766e; background:#f0fdfa; padding:16px 18px; margin:24px 0; border-radius:8px; }
+    .back-links { display:flex; flex-wrap:wrap; gap:12px; margin-top:34px; }
+    .back-links a { color:#0f766e; font-weight:800; text-decoration:none; }
+    a:focus-visible, button:focus-visible { outline:3px solid #f59e0b; outline-offset:3px; }
+    @media (max-width:720px) { .article-top { align-items:flex-start; flex-direction:column; } }
+  </style>
+</head>
+<body class="site-page">
+  <main class="article-shell">
+    <div class="article-top"><a class="article-brand" href="index.html"><img src="assets/taxgal-mascot-generated.png" alt="TaxGal mascot"><span>TaxGal Indonesia</span></a><button id="siteLanguageToggle" class="language-toggle" type="button">Show in Indonesian</button></div>
+
+    <h1 data-en="Corrections Policy" data-local="Corrections Policy">Corrections Policy</h1>
+    <p data-en="TaxGal is meant to get better over time. Because public budgets are complex, reader corrections and official source suggestions are especially helpful." data-local="TaxGal is meant to get better over time. Because public budgets are complex, reader corrections and official source suggestions are especially helpful.">TaxGal is meant to get better over time. Because public budgets are complex, reader corrections and official source suggestions are especially helpful.</p>
+    <div class="callout"><p data-en="Last Updated: May 2026" data-local="Last Updated: May 2026">Last Updated: May 2026</p></div>
+    <h2 data-en="What To Send" data-local="What To Send">What To Send</h2>
+    <ul>
+      <li data-en="The page or calculator category that may need correction." data-local="The page or calculator category that may need correction.">The page or calculator category that may need correction.</li>
+      <li data-en="A link to the official source, budget table, audit, public accounts document, or government report." data-local="A link to the official source, budget table, audit, public accounts document, or government report.">A link to the official source, budget table, audit, public accounts document, or government report.</li>
+      <li data-en="The fiscal year, publication date, and a short explanation of what should change." data-local="The fiscal year, publication date, and a short explanation of what should change.">The fiscal year, publication date, and a short explanation of what should change.</li>
+      <li data-en="For accessibility issues, describe the device, browser, and part of the page that caused trouble." data-local="For accessibility issues, describe the device, browser, and part of the page that caused trouble.">For accessibility issues, describe the device, browser, and part of the page that caused trouble.</li>
+    </ul>
+    <h2 data-en="Government Officials And Policy Staff" data-local="Government Officials And Policy Staff">Government Officials And Policy Staff</h2>
+    <p data-en="Budget, finance, audit, program, and policy officials are invited to contact hi@taxgal.org if they can help update the calculator with more accurate percentages, current fiscal-year data, or clearer category mappings." data-local="Budget, finance, audit, program, and policy officials are invited to contact hi@taxgal.org if they can help update the calculator with more accurate percentages, current fiscal-year data, or clearer category mappings.">Budget, finance, audit, program, and policy officials are invited to contact hi@taxgal.org if they can help update the calculator with more accurate percentages, current fiscal-year data, or clearer category mappings.</p>
+    <div class="back-links"><a href="index.html" data-en="Back To Calculator" data-local="Back To Calculator">Back To Calculator</a></div>
+  </main>
+  <script>
+    function toggleLanguage() {
+      const next = document.documentElement.lang === 'en' ? 'local' : 'en';
+      document.documentElement.lang = next === 'en' ? 'en' : 'id';
+      document.querySelectorAll('[data-en][data-local]').forEach((node) => { node.innerHTML = next === 'en' ? node.dataset.en : node.dataset.local; });
+      document.getElementById('siteLanguageToggle').textContent = next === 'en' ? "Show in Indonesian" : 'Show in English';
+    }
+    document.getElementById('siteLanguageToggle').addEventListener('click', toggleLanguage);
+    try { if (new URLSearchParams(window.location.search).get('lang') === 'local') toggleLanguage(); } catch (error) {}
+  </script>
+</body>
+</html>
